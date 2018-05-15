@@ -1,0 +1,57 @@
+Software Version	SPB 6.x
+Description	
+To run SOAP queries in PHP, follow the example code below:
+$trace = true;
+$exceptions = false;
+ 
+$ns = 'http://services.sandvine.com' ; //Namespace of the WS.
+$user = 'my_username';
+$psw = 'my_password';
+ 
+// Create Soap Request Body
+$soap_req_body = array('Debug' => 'true', 'Name' => 'test3', 'SubscriberRealmKey' => array ('Name' => 'DEFAULT'));
+ 
+//Create Soap Auth Header.
+ 
+$header_usr = new SOAPHeader($ns, "username", $user);
+$header_psw = new SOAPHeader($ns, "password", $psw);
+$full_header = array ($header_usr, $header_psw);
+ 
+// Create new Soap Client
+$client = new SoapClient("https://127.0.0.1:8443/SubscriberServices/SubscriberServices?wsdl", array('trace' => $trace, 'exceptions' => $exceptions));
+ 
+//Set proper authentication headers
+$client->__setSoapHeaders($full_header);
+ 
+//Submit CreateSubscriber Request
+$response = $client->CreateSubscriber($soap_req_body);
+ 
+//Checkout the response
+var_dump($response);
+The above code will send a CreateSubscriber request (similar to the one below) to add a new subscriber to spb:
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.subscriberservices.sandvine.com">
+   <soapenv:Header xmlns:svsec="http://services.sandvine.com">
+      <svsec:username>my_username</svsec:username>
+      <svsec:password>my_password</svsec:password>
+   </soapenv:Header>
+   <soapenv:Body>
+      <ws:CreateSubscriberRequest>
+         <Debug>True</Debug>
+         <SubscriberRealmKey>
+            <Name>DEFAULT</Name>
+         </SubscriberRealmKey>
+         <Name>test3</Name>
+      </ws:CreateSubscriberRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
+The following example uses the my_username/my_password credentials, which you may need to change to match your deployment. To assist with troubleshooting, the PHP code has the debug information enabled:
+$trace = true;
+$exceptions = false;
+Also, the SOAP query has debug information enabled:
+$soap_req_body = array('Debug' => 'true',      ---------snip ---------
+You should remove the debug information for production systems.
+To find out which requests you can submit, see the wsdl file.
+http://<hostname>:<port>/SubscriberServices/SubscriberServices?wsdl
+To find out which parameters you need to pass on to these requests, see the xsd file:
+http://<hostname>:<port>/SubscriberServices/SubscriberServices?xsd=1
+The same information from the two links above and more is included in the SPB API Guide.
